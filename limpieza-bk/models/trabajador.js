@@ -40,7 +40,7 @@ const trabajadorSchema = new mongoose.Schema({
 })
 trabajadorSchema.methods.generadorJWT = function() {
     return jwt.sign({
-        codigo_trabajador: this.codigo_trabajador,
+        codigo_trabajador: this.codigo_trabajador ,
         correo: this.correo
     }, "pass")
 }

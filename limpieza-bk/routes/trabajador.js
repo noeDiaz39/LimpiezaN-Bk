@@ -44,10 +44,50 @@ router.post('/', [
       estado: req.body.estado
     });
     await trabajador.save()
-    const token = JsonWebTokenError.sing({ _id: trabajador._id }, 'secretKey')
-    res.status(200).send(token)
+    const jwtoken = trabajador.generadorJWT();
+    const envio = [jwtoken + ",", trabajador.nombre + ",", trabajador.estado]
+    res.status(201).send({envio})
+    
 })
 
+router.put('/', async(req, res) => {
+    let trabajador = await Trabajador.findOne({ correo: req.body.correo })
+    if (!trabajador) {
+        return res.status(400).send("Usuario no encontrado")
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const passcifrado = await bcrypt.hash(req.body.pass, salt)
+
+    const trabajador_modificado = await Trabajador.findOneAndUpdate({ correo: req.body.correo }, {
+        nombre: req.body.nombre,
+      apellidoP: req.body.apellidoP,
+      apellidoM: req.body.apellidoM,
+      telefono: req.body.telefono,
+      correo: req.body.correo,
+      pass: passcifrado,
+      estado: req.body.estado
+
+    }, {
+        new: true
+    })
+
+    res.status(201).send(trabajador_modificado)
+})
+router.get('/:correo', async(req, res) => {
+    const trabajadorencontrado = await Trabajador.findOne({ correo: req.params.correo })
+    if (trabajadorencontrado) {
+        return res.send(trabajadorencontrado)
+    }
+    return res.send("Trabajador no encontrado")
+})
+
+router.post('/eliminar', async(req, res) => {
+    await Trabajador.findOneAndDelete({ correo: req.body.correo }, function(err, trabajadorelimnado) {
+        if (err) { res.send(err) }
+        res.json({ Mensaje: 'Trabajador eliminado' })
+    })
+})
 
 
 router.post('/login', [
@@ -74,37 +114,5 @@ router.post('/login', [
     const envio = [jwtoken + ",", trabajador.nombre + ",", trabajador.estado]
     res.status(201).send({ envio })
 })
-
-router.put('/', async(req, res) => {
-    const trabajador = await Trabajador.findOneAndUpdate({ correo: req.body.correo }, {
-        nombre: req.body.nombre,
-      apellidoP: req.body.apellidoP,
-      apellidoM: req.body.apellidoM,
-      telefono: req.body.telefono,
-      correo: req.body.correo,
-      pass: passcifrado,
-      estado: req.body.estado
-
-    }, {
-        new: true
-    })
-
-    res.status(201).send(trabajador)
-})
-router.get('/:correo', async(req, res) => {
-    const trabajadorencontrado = await Trabajador.findOne({ correo: req.params.correo })
-    if (trabajadorencontrado) {
-        return res.send(trabajadorencontrado)
-    }
-    return res.send("Trabajador no encontrado")
-})
-
-router.post('/eliminar', async(req, res) => {
-    await Trabajador.findOneAndDelete({ correo: req.body.correo }, function(err, trabajadorelimnado) {
-        if (err) { res.send(err) }
-        res.json({ Mensaje: 'Trabajador eliminado' })
-    })
-})
-
 
 module.exports = router;
