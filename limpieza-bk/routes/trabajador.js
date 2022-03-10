@@ -46,8 +46,7 @@ router.post('/', [
     await trabajador.save()
     const jwtoken = trabajador.generadorJWT();
     const envio = [jwtoken + ",", trabajador.nombre + ",", trabajador.estado]
-    res.status(201).send({envio})
-    
+    res.status(201).send({envio})    
 })
 
 router.put('/', async(req, res) => {
@@ -56,16 +55,11 @@ router.put('/', async(req, res) => {
         return res.status(400).send("Usuario no encontrado")
     }
 
-    const salt = await bcrypt.genSalt(10)
-    const passcifrado = await bcrypt.hash(req.body.pass, salt)
-
     const trabajador_modificado = await Trabajador.findOneAndUpdate({ correo: req.body.correo }, {
         nombre: req.body.nombre,
       apellidoP: req.body.apellidoP,
       apellidoM: req.body.apellidoM,
       telefono: req.body.telefono,
-      correo: req.body.correo,
-      pass: passcifrado,
       estado: req.body.estado
 
     }, {

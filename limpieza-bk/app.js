@@ -14,13 +14,13 @@ const mongoose = require('mongoose');
 mongoose.connect('mongodb+srv://NoeDiaz:noe12998@cluster0-hhcle.mongodb.net/Limpieza_Nava', { useNewUrlParser: true, useUnifiedTopology: true });
 
 //conexion con paginas
-require('./models/empleado');
+require('./models/cliente');
 require('./models/trabajador')
 
 
 var indexRouter = require('./routes');
 var usersRouter = require('./routes/users');
-var empleadoRouter = require('./routes/empleado');
+var clienteRouter = require('./routes/cliente');
 const trabajadorRouter = require('./routes/trabajador');
 
 var app = express();
@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/empleado',empleadoRouter);
+app.use('/cliente',clienteRouter);
 app.use('/trabajador', trabajadorRouter);
 
 // catch 404 and forward to error handler
