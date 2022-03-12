@@ -96,12 +96,12 @@ router.post('/login', [
     let trabajador = await Trabajador.findOne({ correo: req.body.correo })
 
     if (!trabajador) {
-        return res.status(400).send('codigo de trabajador o contraseña incorrecto')
+        return res.status(400).send('correo de trabajador o contraseña incorrecto')
     }
     const validacontra = await bcrypt.compare(req.body.pass, trabajador.pass)
 
     if (!validacontra) {
-        return res.status(400).send('codigo de trabajador o contraseña incorrecto')
+        return res.status(400).send('correo de trabajador o contraseña incorrecto')
     }
 
     const jwtoken = trabajador.generadorJWT();

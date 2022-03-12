@@ -14,6 +14,7 @@ router.get('/', async(req, res, next) => {
     })
 });
 
+
 router.post('/', [ 
     check('correo').isLength({ min: 1 }),   
     check('rfc').isLength({ min: 1 })
@@ -24,7 +25,7 @@ router.post('/', [
     }
     let cliente = await Cliente.findOne({ correo: req.body.correo ,rfc: req.body.rfc})
     if (cliente) {
-        return res.status(400).send('ya esta registrado')
+        return res.status(400).send('ya esta registrado el correo o RFC')
     }
 
     cliente = new Cliente({
@@ -33,21 +34,7 @@ router.post('/', [
       telefono: req.body.telefono,
       correo: req.body.correo,
       direccion: req.body.direccion,
-      estado: req.body.estado,
-      factura:{
-          
-        adeudo: req.body.adeudo,
-        pagado: req.body.pagado,
-        total: req.body.total,
-        fecha_factura: req.body.fecha_factura,
-        fecha_limite: req.body.fecha_limite,
-        notas:req.body.notas  
-      },
-      informacion_bancaria:{
-        cuenta: req.body.cuenta,
-        banco: req.body.banco,        
-        estado_b: req.body.estado_b 
-        }  
+      estado: req.body.estado 
     });
     await cliente.save()
     res.status(201).send("registrado con exito")
@@ -67,7 +54,8 @@ router.post('/factura', [
 
     const insercion_factura = await Cliente.updateOne({ rfc: req.body.rfc }, {     
         $push: {
-            factura:{          
+            factura:{    
+                folio: req.body.folio,      
                 adeudo: req.body.adeudo,
                 pagado: req.body.pagado,
                 total: req.body.total,
@@ -91,9 +79,13 @@ router.put('/factura', [
     if (!cliente) {
         return res.status(400).send("cliente no encontrado")
     }
+    let v = await Cliente.findOne({  rfc: req.body.rfc , factura: {folio: req.dody.folio} })
+    if (!v) {
+        return res.status(400).send("folio no encontrado")
+    }
 
-    const insercion_factura = await Cliente.updateOne({ rfc: req.body.rfc }, {     
-        $push: {
+    const actualizacion_factura = await Cliente.findByIdAndUpdate({factura: {folio: req.dody.folio} }, {     
+        $set: {
             factura:{          
                 adeudo: req.body.adeudo,
                 pagado: req.body.pagado,
@@ -104,7 +96,7 @@ router.put('/factura', [
               }
         } 
     });    
-    res.status(201).send("registrado con exito"+ insercion_factura)
+    res.status(201).send("registrado con exito"+ actualizacion_factura)
 })
 
 router.post('/banco', [       
