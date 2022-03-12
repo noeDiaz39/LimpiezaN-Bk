@@ -84,15 +84,12 @@ router.put('/factura', [
         return res.status(400).send("folio no encontrado")
     }
 
-    const actualizacion_factura = await Cliente.findByIdAndUpdate({factura: {folio: req.dody.folio} }, {     
+    const actualizacion_factura = await Cliente.updateOne({factura: {folio: req.dody.folio} }, {     
         $set: {
             factura:{          
                 adeudo: req.body.adeudo,
                 pagado: req.body.pagado,
-                total: req.body.total,
-                fecha_factura: req.body.fecha_factura,
-                fecha_limite: req.body.fecha_limite,
-                notas:req.body.notas  
+                total: req.body.total 
               }
         } 
     });    
