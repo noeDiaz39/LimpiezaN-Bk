@@ -63,18 +63,18 @@ router.post('/', [
 })
 
 router.post('/factura', [       
-    check('rfc').isLength({ min: 1 })
+    
 ], async(req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    let cliente = await Cliente.findOne({ rfc: req.body.rfc })
+    let cliente = await Cliente.findOne({ _id: req.body._id })
     if (!cliente) {
         return res.status(400).send("cliente no encontrado")
     }
 
-    const insercion_factura = await Cliente.updateOne({ rfc: req.body.rfc }, {     
+    const insercion_factura = await Cliente.updateOne({ _id: req.body._id }, {     
         $push: {
             factura:{    
                 folio: req.body.folio,      
