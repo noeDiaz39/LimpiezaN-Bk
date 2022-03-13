@@ -14,6 +14,28 @@ router.get('/', async(req, res, next) => {
     })
 });
 
+router.get('/rfc', async(req, res) => {
+    const clienteencontrado = await Cliente.findOne({ rfc: req.body.rfc })
+    if (clienteencontrado) {
+        return res.send(clienteencontrado)
+    }
+    return res.send("cliente no encontrado")
+})
+//no funciona por el momento
+router.get('/factura', async(req, res) => {
+    const clienteencontrado = await Cliente.findOne({ rfc: req.body.rfc })
+    if (clienteencontrado) {
+        const facturaencontrada = await Cliente.findById({factura:[{_id:req.body.id}]})
+    if (facturaencontrada) {
+        return res.json(facturaencontrada)
+    }    
+    return res.send("factura no encontrado")
+    }
+    return res.send("cliente no encontrado")
+    
+    
+})
+
 
 router.post('/', [ 
     check('correo').isLength({ min: 1 }),   
@@ -65,9 +87,9 @@ router.post('/factura', [
               }
         } 
     });    
-    res.status(201).send("registrado con exito"+ insercion_factura)
+    res.status(201).send("registrado con exito")
 })
-
+//no funciona por el momento
 router.put('/factura', [       
     check('rfc').isLength({ min: 1 })
 ], async(req, res) => {
@@ -79,14 +101,11 @@ router.put('/factura', [
     if (!cliente) {
         return res.status(400).send("cliente no encontrado")
     }
-    let v = await Cliente.findOne({  rfc: req.body.rfc , factura: {folio: req.dody.folio} })
-    if (!v) {
-        return res.status(400).send("folio no encontrado")
-    }
 
-    const actualizacion_factura = await Cliente.updateOne({factura: {folio: req.dody.folio} }, {     
-        $set: {
-            factura:{          
+    const actualizacion_factura = await Cliente.findByIdAndUpdate({_id:req.body.id} , {     
+        $push: {
+            factura:{  
+                folio: req.body.folio,        
                 adeudo: req.body.adeudo,
                 pagado: req.body.pagado,
                 total: req.body.total 
@@ -117,16 +136,10 @@ router.post('/banco', [
                 }
         } 
     });    
-    res.status(201).send("registrado con exito"+ insercion_banco)
+    res.status(201).send("registrado con exito")
 })
 
-router.get('/:rfc', async(req, res) => {
-    const clienteencontrado = await Cliente.findOne({ rfc: req.params.rfc })
-    if (clienteencontrado) {
-        return res.send(clienteencontrado)
-    }
-    return res.send("cliente no encontrado")
-})
+
 
 router.put('/', async(req, res) => {
     let cliente = await Cliente.findOne({ rfc: req.body.rfc })
@@ -138,21 +151,7 @@ router.put('/', async(req, res) => {
         nombre: req.body.nombre,        
         telefono: req.body.telefono,        
         direccion: req.body.direccion,
-        estado: req.body.estado,
-        factura:{
-            
-          adeudo: req.body.adeudo,
-          pagado: req.body.pagado,
-          total: req.body.total,
-          fecha_factura: req.body.fecha_factura,
-          fecha_limite: req.body.fecha_limite,
-          notas:req.body.notas  
-        },
-        informacion_bancaria:{
-          cuenta: req.body.cuenta,
-          banco: req.body.banco,        
-          estado_b: req.body.estado_b 
-          }
+        estado: req.body.estado
     }, {
         new: true
     })

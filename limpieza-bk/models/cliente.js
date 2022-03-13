@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 mongoose.set('useCreateIndex' )
 
-const trabajadorSchema = new mongoose.Schema({
+const trabajadorSchema = new mongoose.Schema({    
 
     nombre: {
         type: String
@@ -25,10 +25,6 @@ const trabajadorSchema = new mongoose.Schema({
         type:String
     },
     factura:[{
-        folio:{
-            type:String
-            
-        },
         adeudo:{
             type: String
         },
