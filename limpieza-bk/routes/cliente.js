@@ -3,6 +3,7 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const nodemailer = require("nodemailer");
 const mongoose = require('mongoose');
+const { json } = require('express');
 const Cliente = mongoose.model('cliente');
 
 /* GET users listing. */
@@ -10,9 +11,11 @@ router.get('/', async(req, res, next) => {
     const cliente = await Cliente.find()
     res.send(cliente).status(200)
 });
-router.post('/envio', async(req, res) => {
-    const correo = await Cliente.findOne({ correo: req.body.correo })
-    if (correo) { 
+router.post('/envio', [ 
+    check('rfc').isLength({ min: 1 })
+], async(req, res) => {
+    const infocli = await Cliente.findOne({ rfc: req.body.rfc })
+    if (infocli) { 
             let testAccount = await nodemailer.createTestAccount();
             const transporter = nodemailer.createTransport({
               host: "smtp.gmail.com",
@@ -24,24 +27,22 @@ router.post('/envio', async(req, res) => {
               },
             });    
         // send mail with defined transport object
-        const infoimail ={
-            from: '"yo lo envio" <2119200696@soy.utj.edu.mx>', // sender address
-            to: correo, // list of receivers
-            subject: "desde node", // Subject line
-            text: "Hello world?", // plain text body
-            html: "<b>Hello world?</b>", // html body
-
+        const infoimail = {
+            from: '"Estado de tu cuenta" <2119200696@soy.utj.edu.mx>', // sender address
+            to: infocli.correo, // list of receivers
+            subject: "Limpieza nava", // Subject line
+            text: (JSON.stringify(infocli.factura)) // plain text body
         }
     transporter.sendMail(infoimail,(error,info) =>{
         if(error){
-            res.status(500).send(error.message)
+           return res.status(400).send(error.message)
         }else{            
-            res.status(200).send("mensaje enviado")
+            return res.status(200).send("mensaje enviado")
         }
     });
-    }
-    return res.send("cliente no encontrado")
-    
+    }else{
+        return res.send("cliente no encontrado")
+    }    
 })
 
 router.get('/rfc', async(req, res) => {
@@ -53,15 +54,11 @@ router.get('/rfc', async(req, res) => {
 })
 //no funciona por el momento
 router.get('/factura', async(req, res) => {
-    const clienteencontrado = await Cliente.findOne({ rfc: req.body.rfc })
-    if (clienteencontrado) {
-        const facturaencontrada = await Cliente.findById({factura:[{_id:req.body.id}]})
-    if (facturaencontrada) {
-        return res.json(facturaencontrada)
-    }    
-    return res.send("factura no encontrado")
+    const clienteencontrado = await Cliente.findOne({rfc:req.body.rfc})
+    if (clienteencontrado) {        
+        return res.status(200).send(JSON.stringify(clienteencontrado.factura))
     }
-    return res.send("cliente no encontrado")    
+    return res.status(400).send("factura no encontrado")   
     
 })
 
@@ -98,18 +95,17 @@ router.post('/factura', [
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    let cliente = await Cliente.findOne({ _id: req.body._id })
+    let cliente = await Cliente.findOne({ rfc: req.body.rfc })
     if (!cliente) {
         return res.status(400).send("cliente no encontrado")
     }
 
-    const insercion_factura = await Cliente.updateOne({ _id: req.body._id }, {     
+    const insercion_factura = await Cliente.updateOne({ rfc: req.body.rfc }, {     
         $push: {
-            factura:{    
-                folio: req.body.folio,      
+            factura:{         
                 adeudo: req.body.adeudo,
                 pagado: req.body.pagado,
-                total: req.body.total,
+                total: adeudo-pagado,
                 fecha_factura: req.body.fecha_factura,
                 fecha_limite: req.body.fecha_limite,
                 notas:req.body.notas  
@@ -129,14 +125,12 @@ router.put('/factura', [
     let cliente = await Cliente.findOne({ rfc: req.body.rfc })
     if (!cliente) {
         return res.status(400).send("cliente no encontrado")
-    }
-
-    const idreq = await mongoose.Types.ObjectId(req.body.id);
-
-    const actualizacion_factura = await Cliente.findOne({ rfc: req.body.rfc,factura:{idreq}} , {     
+    } 
+    JSON.stringify(Cliente)
+    const actualizacion_factura = await Cliente.findByIdAndUpdate({factura:{_id:req.body._id} } , { 
+        
         $push: {
-            factura:{  
-                folio: req.body.folio,        
+            factura:{         
                 adeudo: req.body.adeudo,
                 pagado: req.body.pagado,
                 total: req.body.total 
