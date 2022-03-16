@@ -8,10 +8,8 @@ const Cliente = mongoose.model('cliente');
 
 /* GET users listing. */
 router.get('/', async(req, res, next) => {
-    const cliente = await Cliente.find(function(err, cliente) {
-        if (err) { next(err) }
-        res.json(cliente)
-    })
+    const cliente = await Cliente.find()
+    res.send(cliente).status(200)
 });
 
 router.get('/rfc', async(req, res) => {
@@ -31,8 +29,7 @@ router.get('/factura', async(req, res) => {
     }    
     return res.send("factura no encontrado")
     }
-    return res.send("cliente no encontrado")
-    
+    return res.send("cliente no encontrado")    
     
 })
 
@@ -89,7 +86,7 @@ router.post('/factura', [
     });    
     res.status(201).send("registrado con exito")
 })
-//no funciona por el momento
+//no funciona por el momento actusalizar
 router.put('/factura', [       
     check('rfc').isLength({ min: 1 })
 ], async(req, res) => {
@@ -102,7 +99,9 @@ router.put('/factura', [
         return res.status(400).send("cliente no encontrado")
     }
 
-    const actualizacion_factura = await Cliente.findByIdAndUpdate({_id:req.body.id} , {     
+    const idreq = await mongoose.Types.ObjectId(req.body.id);
+
+    const actualizacion_factura = await Cliente.findOne({ rfc: req.body.rfc,factura:{idreq}} , {     
         $push: {
             factura:{  
                 folio: req.body.folio,        
@@ -140,23 +139,21 @@ router.post('/banco', [
 })
 
 
-
 router.put('/', async(req, res) => {
     let cliente = await Cliente.findOne({ rfc: req.body.rfc })
     if (!cliente) {
         return res.status(400).send("cliente no encontrado")
     }
+    
 
     const cliente_actualizado = await Cliente.findOneAndUpdate({ rfc: req.body.rfc }, {
         nombre: req.body.nombre,        
         telefono: req.body.telefono,        
         direccion: req.body.direccion,
         estado: req.body.estado
-    }, {
-        new: true
     })
 
-    res.status(201).send(cliente_actualizado)
+    res.status(201).send("actualizacion completada")
 })
 
 router.post('/eliminar', async(req, res) => {

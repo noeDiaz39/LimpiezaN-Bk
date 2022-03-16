@@ -12,7 +12,7 @@ const trabajadorSchema = new mongoose.Schema({
         unique: true
     },
     telefono: {
-        type: String
+        type: Number
     },
     correo: {
         type: String,
@@ -25,20 +25,21 @@ const trabajadorSchema = new mongoose.Schema({
         type:String
     },
     factura:[{
+        
         adeudo:{
-            type: String
+            type: Number
         },
         pagado:{
-            type: String
+            type: Number
         },
         total:{
-            type: String
+            type: Number
         },
         fecha_factura:{
-            type: String
+            type: Date
         },
         fecha_limite:{
-            type:String
+            type: Date
         },   
         notas:{
             type: String

@@ -20,7 +20,7 @@ const trabajadorSchema = new mongoose.Schema({
         required: true
     },
     telefono: {
-        type: String,
+        type: Number,
         require: true
     },
     correo: {
