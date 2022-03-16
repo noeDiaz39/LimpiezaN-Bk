@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.set('useCreateIndex' )
+//mongoose.set('useCreateIndex' )
 
 const trabajadorSchema = new mongoose.Schema({    
 

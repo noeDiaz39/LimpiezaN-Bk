@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken')
-mongoose.set('useCreateIndex' )
+//mongoose.set('useCreateIndex' )
 
 
 const trabajadorSchema = new mongoose.Schema({

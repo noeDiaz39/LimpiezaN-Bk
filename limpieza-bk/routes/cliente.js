@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
-const bcrypt = require('bcrypt');
-const auth = require('../middleware/auth');
+const nodemailer = require("nodemailer");
 const mongoose = require('mongoose');
 const Cliente = mongoose.model('cliente');
 
@@ -11,11 +10,44 @@ router.get('/', async(req, res, next) => {
     const cliente = await Cliente.find()
     res.send(cliente).status(200)
 });
+router.post('/envio', async(req, res) => {
+    const correo = await Cliente.findOne({ correo: req.body.correo })
+    if (correo) { 
+            let testAccount = await nodemailer.createTestAccount();
+            const transporter = nodemailer.createTransport({
+              host: "smtp.gmail.com",
+              port: 465,
+              secure: true, // true for 465, false for other ports
+              auth: {
+                user: '2119200696@soy.utj.edu.mx', // generated ethereal user
+                pass: 'pkjvbvljtsjpoxjr', // generated ethereal password
+              },
+            });    
+        // send mail with defined transport object
+        const infoimail ={
+            from: '"yo lo envio" <2119200696@soy.utj.edu.mx>', // sender address
+            to: correo, // list of receivers
+            subject: "desde node", // Subject line
+            text: "Hello world?", // plain text body
+            html: "<b>Hello world?</b>", // html body
+
+        }
+    transporter.sendMail(infoimail,(error,info) =>{
+        if(error){
+            res.status(500).send(error.message)
+        }else{            
+            res.status(200).send("mensaje enviado")
+        }
+    });
+    }
+    return res.send("cliente no encontrado")
+    
+})
 
 router.get('/rfc', async(req, res) => {
     const clienteencontrado = await Cliente.findOne({ rfc: req.body.rfc })
     if (clienteencontrado) {
-        return res.send(clienteencontrado)
+        return res.send(clienteencontrado)        
     }
     return res.send("cliente no encontrado")
 })
